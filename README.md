@@ -2,7 +2,7 @@
 
 ## Run in Development environment
 
-First, start a postgresql instance
+First, start a mysql instance
 ```
-docker run -p 5432:5432 --name postgres -e POSTGRES_PASSWORD=mysecretpassword -d postgres
+docker container run -p 3306:3306 --name mysql  -e MYSQL_ROOT_PASSWORD=password -d mysql:8
 ```
