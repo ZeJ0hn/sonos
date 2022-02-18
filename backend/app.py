@@ -17,11 +17,17 @@ _connector = Connector()
 SetUp(_connector)
 
 
+def __check(data, keys):
+    return all(k in data.keys() for k in keys)
+
+
 @app.post("/api/tasks/create")
 async def create_task(request: Request) -> HTTPResponse:
     data = request.json
 
-    # TODO Add parameters check
+    if not __check(data, ('name',)):
+        return InvalidUsage("Payload must contains only task name")
+
     task_id = _connector.create_task(name=data['name'])
 
     return jsonify({
@@ -36,74 +42,77 @@ async def get_tasks(request: Request) -> HTTPResponse:
     return jsonify(tasks)
 
 
-@app.get("/api/tasks/<task_id:str>")
-async def get_task(request: Request, task_id: str) -> HTTPResponse:
+@app.get("/api/tasks/<task_id:int>")
+async def get_task(request: Request, task_id: int) -> HTTPResponse:
     task = _connector.get_task(task_id=task_id)
 
     return jsonify(task)
 
 
-@app.post("/api/tasks/<task_id:str>/finish")
-async def get_tasks(request: Request, task_id: str) -> HTTPResponse:
-    _connector.mark_finished(task_id=task_id)
+@app.post("/api/tasks/<task_id:int>/done")
+async def get_tasks(request: Request, task_id: int) -> HTTPResponse:
+    _connector.mark_processed(task_id=task_id)
 
     return empty(status=200)
 
 
-@app.post("/api/tasks/<task_id:str>/audios/create")
-async def add_audio(request: Request, task_id: str) -> HTTPResponse:
-    # TODO Add parameters check
-    name = request.form.get('name')
-    data = request.files.get('data')
+@app.post("/api/tasks/<task_id:int>/audios/create")
+async def add_audio(request: Request, task_id: int) -> HTTPResponse:
+    if len(request.files) != 1:
+        return InvalidUsage("Form must contains just one files")
 
-    audio_id = _connector.create_audio(task_id=task_id, name=name, data=data)
+    name = next(iter(request.files))
+    file = request.files.get(name)
+
+    audio_id = _connector.create_audio(task_id=task_id, name=name, data=file.body)
 
     return jsonify({
         'id': audio_id
     })
 
 
-@app.get("/api/tasks/<task_id:str>/audios")
-async def get_audios(request: Request, task_id: str) -> HTTPResponse:
+@app.get("/api/tasks/<task_id:int>/audios")
+async def get_audios(request: Request, task_id: int) -> HTTPResponse:
     audios = _connector.get_audios(task_id=task_id)
 
     return jsonify(audios)
 
 
-@app.get("/api/tasks/<task_id:str>/audios/<audio_id:str>")
-async def get_audio(request: Request, task_id: str, audio_id: str) -> HTTPResponse:
+@app.get("/api/tasks/<task_id:int>/audios/<audio_id:int>")
+async def get_audio(request: Request, task_id: int, audio_id: int) -> HTTPResponse:
     audio = _connector.get_audio(task_id=task_id, audio_id=audio_id)
 
     return jsonify(audio)
 
 
-@app.get("/api/tasks/<task_id:str>/audios/<audio_id:str>/track")
-async def get_track(request: Request, task_id: str, audio_id: str) -> HTTPResponse:
+@app.get("/api/tasks/<task_id:int>/audios/<audio_id:int>/track")
+async def get_track(request: Request, task_id: int, audio_id: int) -> HTTPResponse:
     data = _connector.get_audio_data(task_id=task_id, audio_id=audio_id)
 
     return raw(data)
 
 
-@app.post("/api/tasks/<task_id:str>/audios/<audio_id:str>/annotate")
-async def annotate_audio(request: Request, task_id: str, audio_id: str) -> HTTPResponse:
+@app.post("/api/tasks/<task_id:int>/audios/<audio_id:int>/annotate")
+async def annotate_audio(request: Request, task_id: int, audio_id: int) -> HTTPResponse:
     data = request.json
 
-    # TODO Add parameters check
+    if not __check(data, ('wakeword_start', 'wakeword_start', 'utterance_start', 'utterance_end')):
+        return InvalidUsage("Payload must contains: wakeword_start, wakeword_start, utterance_start, utterance_end")
 
     _connector.annotate_audio(audio_id=audio_id, **data)
 
     return empty(status=200)
 
 
-@app.post("/api/tasks/<task_id:str>/audios/<audio_id:str>/done")
-async def process_audio(request: Request, task_id: str, audio_id: str) -> HTTPResponse:
+@app.post("/api/tasks/<task_id:int>/audios/<audio_id:int>/done")
+async def process_audio(request: Request, task_id: int, audio_id: int) -> HTTPResponse:
     _connector.mark_done(task_id=task_id, audio_id=audio_id)
 
     return empty(status=200)
 
 
-@app.post("/api/tasks/<task_id:str>/audios/<audio_id:str>/skip")
-async def skip_audio(request: Request, task_id: str, audio_id: str) -> HTTPResponse:
+@app.post("/api/tasks/<task_id:int>/audios/<audio_id:int>/skip")
+async def skip_audio(request: Request, task_id: int, audio_id: int) -> HTTPResponse:
     _connector.mark_skip(task_id=task_id, audio_id=audio_id)
 
     return empty(status=200)

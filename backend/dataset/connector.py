@@ -26,7 +26,7 @@ class Connector:
     def get_tasks(self) -> Dict[str, str]:
         with self.cursor as curs:
             curs.execute("""
-            SELECT id, name, submitted 
+            SELECT id, name, processed 
             FROM Tasks
             """)
             rows = curs.fetchall()
@@ -36,7 +36,7 @@ class Connector:
                 result.append({
                     'id': row[0],
                     'name': row[1],
-                    'submitted': bool(row[2] == 1)
+                    'processed': bool(row[2] == 1)
                 })
 
             return result
@@ -44,7 +44,7 @@ class Connector:
     def get_task(self, task_id: str) -> Dict[str, str]:
         with self.cursor as curs:
             curs.execute("""
-            SELECT id, name, submitted 
+            SELECT id, name, processed 
             FROM Tasks 
             WHERE id = %s
             """, (task_id,))
@@ -53,10 +53,10 @@ class Connector:
             return {
                 'id': row[0],
                 'name': row[1],
-                'submitted': row[2]
+                'processed': row[2]
             }
 
-    def mark_finished(self, task_id: str) -> None:
+    def mark_processed(self, task_id: str) -> None:
         with self.cursor as curs:
             curs.execute("""
             UPDATE Tasks 
@@ -65,7 +65,7 @@ class Connector:
             """, (task_id,))
             self.__conn.commit()
 
-    def create_audio(self,  task_id: str, name: str, data: bytes) -> str:
+    def create_audio(self,  task_id: int, name: str, data: bytes) -> str:
         with self.cursor as curs:
             curs.execute("""
             INSERT INTO Audios (task_id, name, data) 
@@ -79,7 +79,7 @@ class Connector:
         with self.cursor as curs:
             curs.execute("""
             SELECT id, name, status 
-            FROM Audios 
+            FROM Audios
             WHERE task_id = %s
             """, (task_id,))
             rows = curs.fetchall()
@@ -97,16 +97,25 @@ class Connector:
     def get_audio(self, task_id: str, audio_id: str) -> Dict[str, Union[str, bool]]:
         with self.cursor as curs:
             curs.execute("""
-            SELECT id, name, status 
+            SELECT id, name, status, wakeword_start, wakeword_end, utterance_start, utterance_end
             FROM Audios 
+            LEFT JOIN Annotations USING(id)
             WHERE id = %s AND task_id = %s
             """, (audio_id, task_id,))
             row = curs.fetchone()
 
+            annotations = {
+                'wakeword_start': row[3],
+                'wakeword_end': row[4],
+                'utterance_start': row[5],
+                'utterance_end': row[6]
+            } if row[3] and row[4] and row[5] and row[6] else {}
+
             return {
                 'id': row[0],
                 'name': row[1],
-                'submitted': row[2]
+                'status': row[2],
+                'annotations': annotations
             }
 
     def get_audio_data(self, task_id: str, audio_id: str) -> bytes:

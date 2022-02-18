@@ -18,7 +18,7 @@ TABLES['Tasks'] = """
     CREATE TABLE IF NOT EXISTS Tasks (
         id          MEDIUMINT NOT NULL AUTO_INCREMENT,
         name        VARCHAR(128) NOT NULL,
-        finished    BOOLEAN NOT NULL DEFAULT false,
+        processed   BOOLEAN NOT NULL DEFAULT false,
         PRIMARY KEY (id)
     ) ENGINE=InnoDB;
 """
@@ -45,7 +45,7 @@ TABLES['Annotations'] = """
         utterance_start INT NOT NULL,
         utterance_end INT NOT NULL,
         PRIMARY KEY (id),
-        FOREIGN KEY (audio_id)
+        FOREIGN KEY (id)
             REFERENCES Audios(id)
             ON DELETE CASCADE
     ) ENGINE=InnoDB;
