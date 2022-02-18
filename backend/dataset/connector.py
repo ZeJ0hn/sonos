@@ -56,6 +56,14 @@ class Connector:
                 'processed': row[2]
             }
 
+    def delete_task(self, task_id: str) -> None:
+        with self.cursor as curs:
+            curs.execute("""
+            DELETE FROM Tasks
+            WHERE id = %s
+            """, (task_id,))
+            self.__conn.commit()
+
     def mark_processed(self, task_id: str) -> None:
         with self.cursor as curs:
             curs.execute("""
@@ -117,6 +125,14 @@ class Connector:
                 'status': row[2],
                 'annotations': annotations
             }
+
+    def delete_audio(self, task_id: str, audio_id: str) -> None:
+        with self.cursor as curs:
+            curs.execute("""
+            DELETE FROM Audios
+            WHERE id = %s AND task_id = %s
+            """, (audio_id, task_id,))
+            self.__conn.commit()        
 
     def get_audio_data(self, task_id: str, audio_id: str) -> bytes:
         with self.cursor as curs:

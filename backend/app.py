@@ -49,6 +49,13 @@ async def get_task(request: Request, task_id: int) -> HTTPResponse:
     return jsonify(task)
 
 
+@app.delete("/api/tasks/<task_id:int>/delete")
+async def get_task(request: Request, task_id: int) -> HTTPResponse:
+    _connector.delete_task(task_id=task_id)
+
+    return empty(200)
+
+
 @app.post("/api/tasks/<task_id:int>/done")
 async def get_tasks(request: Request, task_id: int) -> HTTPResponse:
     _connector.mark_processed(task_id=task_id)
@@ -83,6 +90,13 @@ async def get_audio(request: Request, task_id: int, audio_id: int) -> HTTPRespon
     audio = _connector.get_audio(task_id=task_id, audio_id=audio_id)
 
     return jsonify(audio)
+
+
+@app.delete("/api/tasks/<task_id:int>/audios/<audio_id:int>/delete")
+async def delete_audio(request: Request, task_id: int, audio_id: int) -> HTTPResponse:
+    _connector.delete_audio(task_id=task_id, audio_id=audio_id)
+
+    return empty(200)
 
 
 @app.get("/api/tasks/<task_id:int>/audios/<audio_id:int>/track")
