@@ -11,4 +11,20 @@
         padding: 0.4rem 0.6rem;
         font-family: inherit;
     }
+
+    &__content {
+        display: flex;
+        align-items:stretch;
+        width: 100vw;
+        height: 100vh;
+        margin-top: 1rem;
+
+        &__list {
+            width: 500px;
+            background-color: lightgrey;
+            display: flex;
+            flex-direction: row;
+            align-items:stretch;
+        }
+    }
 }

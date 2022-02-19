@@ -1,7 +1,8 @@
 import os
+import time
 
 import mysql.connector
-from mysql.connector import errorcode, MySQLConnection
+from mysql.connector import MySQLConnection, InterfaceError
 from sanic.log import logger
 
 TABLES = {}
@@ -73,15 +74,26 @@ def connect() -> MySQLConnection:
         db_database = os.getenv('DB_USER', 'Datasets')
 
         # connect to the PostgreSQL server
-        logger.info('Connecting to the PostgreSQL database...')
+        logger.info(f'Connecting to the PostgreSQL database {db_database} on {db_host}...')
 
-        conn = mysql.connector.connect(host=db_host,
-                                       user=db_user,
-                                       password=db_password,
-                                       database=db_database)
+        return try_to_connect(db_host, db_user, db_password, db_database)
 
-        return conn
     except (Exception) as error:
         logger.exception(error)
 
     return None
+
+def try_to_connect(db_host: str, db_user: str, db_password: str, db_database: str) -> MySQLConnection:
+    attemps = 0
+    while attemps < 15:
+        try:
+            return mysql.connector.connect(host=db_host,
+                                        user=db_user,
+                                        password=db_password,
+                                        database=db_database)
+        except Exception:
+            attemps += 1
+            time.sleep(2)
+
+    logger.error("Unable to connect to database after 15 attemps")
+    quit(1)

@@ -3,8 +3,7 @@ version: "3.9"
 
 services:
   db:
-    image: mysql
-    command: --default-authentication-plugin=mysql_native_password
+    image: mysql:8
     restart: always
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: yes
@@ -13,11 +12,12 @@ services:
       MYSQL_DATABASE: Datasets
 
   backend:
-    image: backend
+    build: ./backend
+    image: "backend:latest"
     restart: always
+    depends_on:
+      - db
     ports:
       - 5000:5000
     environment:
       DB_HOST: db
-      DB_USER: user
-      DB_PASSWORD: password
