@@ -1,0 +1,25 @@
+.menu {
+  width: 100%;
+  display: flex;
+  justify-content: left;
+  padding: 0.8rem;
+  background-color: black;
+
+  &__items {
+    display: flex;
+  }
+
+  &__item {
+    padding: 0 1.6rem;
+    color: white;
+    text-decoration: none;
+    font-family: 'Roboto', serif;
+    font-size: 1rem;
+
+    &:hover {
+      color: #444;
+    }
+  }
+
+
+}

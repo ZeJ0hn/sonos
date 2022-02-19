@@ -1,0 +1,29 @@
+.file_uploader {
+    border: 1px solid #ccc;
+    border-radius: 0.2rem;
+    padding: 25px;
+    color: grey;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    height: 2rem;
+  
+    &__button {
+      position: absolute;
+      top: calc(50% - 1.2rem); 
+      left: calc(100% - 3.6rem);
+      border: 1px rgb(63, 63, 63) solid;
+      border-radius: 2px;
+      width: 2.4rem;
+      height: 2.4rem;
+    }
+  
+    &__dragging {
+      background-color: rgb(252, 233, 91);
+    }
+  
+    &__input {
+      display: none;
+    }
+  }
