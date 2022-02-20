@@ -1,6 +1,5 @@
 import React, { useState} from 'react';
 import { useDispatch } from 'react-redux';
-import FileUploader from './FileUploader';
 import { createTask } from 'store/actions';
 
 import 'components/TaskForm.scss';
@@ -8,16 +7,15 @@ import 'components/TaskForm.scss';
 
 const TaskForm = () => {
     const [name, setName] = useState<string>('');
-    const [files, setFiles] = useState<FileList>();
     const dispatch = useDispatch();
 
     const onSubmit = (e) => {
         e.preventDefault();
-        dispatch(createTask(name, files));
-           };
+        dispatch(createTask(name));
+    };
 
     return (
-        <form onSubmit={onSubmit} className='galleryform'>
+        <form onSubmit={onSubmit} className='taskform'>
             <label>
                 Name
                 <input
@@ -27,14 +25,7 @@ const TaskForm = () => {
                 />
             </label>
 
-            <label>
-                Files
-                <FileUploader
-                    files={files}
-                    onDrop={setFiles}
-                />
-            </label>
-            <div className='galleryform__footer'>
+            <div className='taskform__footer'>
                 <input type="submit" value="Create"/>
             </div>
         </form>

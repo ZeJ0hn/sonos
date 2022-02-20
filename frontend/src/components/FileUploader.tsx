@@ -1,12 +1,11 @@
 
-import React, { ReactNode, useEffect, useRef, useState, DragEvent, ChangeEvent } from 'react';
+import React, { ReactNode, useEffect, useRef, useState, DragEvent, ChangeEvent, useMemo } from 'react';
 import classnames from 'classnames';
 
 import './FileUploader.scss';
 
 type FileProps = {
   dragging: boolean;
-  onSelectFileClick: () => void;
   onDrag: (event: React.DragEvent<HTMLDivElement>) => void;
   onDragStart: (event: React.DragEvent<HTMLDivElement>) => void;
   onDragEnd: (event: React.DragEvent<HTMLDivElement>) => void;
@@ -19,7 +18,6 @@ type FileProps = {
 
 const FileUploaderComponent = ({
   dragging,
-  onSelectFileClick,
   onDrag,
   onDragStart,
   onDragEnd,
@@ -47,13 +45,13 @@ const FileUploaderComponent = ({
 };
 
 type Props = {
-  files: FileList | undefined,
   onDrop: (files: FileList) => void;
 };
 
-const FileUploader = ({ files, onDrop }: Props): React.ReactElement<'div'> => {
+const FileUploader = ({ onDrop }: Props): React.ReactElement<'div'> => {
   const [dragging, setDragging] = useState(false);
   const [counter, setCounter] = useState(0);
+  const [files, setFiles] = useState<FileList>();
   const ref = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -99,7 +97,8 @@ const FileUploader = ({ files, onDrop }: Props): React.ReactElement<'div'> => {
     setCounter(0);
     setDragging(false);
 
-    if (event.dataTransfer.files && event.dataTransfer.files.length === 1) {
+    if (event.dataTransfer.files) {
+      setFiles(event.dataTransfer.files);
       onDrop(event.dataTransfer.files);
     }
   };
@@ -109,20 +108,22 @@ const FileUploader = ({ files, onDrop }: Props): React.ReactElement<'div'> => {
     event.stopPropagation();
   };
 
-  const onSelectFileClick = () => {
-    ref.current?.click();
-  };
-
   const onFileChanged = (event: ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files.length === 1) {
+    if (event.target.files) {
+      setFiles(event.target.files);
       onDrop(event.target.files);
     }
   };
 
+  const fileList = useMemo(() => {
+    if (files)
+      return Array.from(files).map((f) => <div key={f.name}>{f.name}</div>)
+    return null;
+  }, [files]);
+
   return (
     <FileUploaderComponent
       dragging={dragging}
-      onSelectFileClick={onSelectFileClick}
       onDrag={overrideEventDefaults}
       onDragStart={overrideEventDefaults}
       onDragEnd={overrideEventDefaults}
@@ -130,11 +131,13 @@ const FileUploader = ({ files, onDrop }: Props): React.ReactElement<'div'> => {
       onDragEnter={dragenterListener}
       onDragLeave={dragleaveListener}
       onDrop={dropListener}>
+      {fileList}
       <input
         ref={ref}
         type='file'
         className='file_uploader__input'
-        onChange={onFileChanged} />
+        onChange={onFileChanged} 
+        multiple />
     </FileUploaderComponent>
   );
 };

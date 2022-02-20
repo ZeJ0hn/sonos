@@ -10,7 +10,7 @@ import { Task, Audio } from 'Types';
 
 export type State = {
     tasks: Task[],
-    task: Task | undefined,
+    current: Task | undefined,
     // imagesStatus: Status,
     audios: Audio[] | undefined,
     // exhibitionsStatus: Status,
@@ -19,7 +19,7 @@ export type State = {
 
 const initialState: State = {
     tasks: [],
-    task: undefined,
+    current: undefined,
     // imagesStatus: Status.DEFAULT,
     audios: undefined,
     // exhibitionsStatus: Status.DEFAULT,
@@ -31,10 +31,20 @@ export const slice = createSlice({
     initialState,
     reducers: {
         setTasks: (state, action: PayloadAction<Task[]>) => {
-            state.tasks = action.payload
+            state.tasks = action.payload;
         },
         addTask: (state, action: PayloadAction<Task>) => {
-            state.tasks = [action.payload, ...state.tasks]
+            state.tasks = [action.payload, ...state.tasks];
+        },
+        setAudios: (state, action: PayloadAction<Audio[]>) => {
+            state.audios = action.payload;
+        },
+        addAudios: (state, action: PayloadAction<Audio[]>) => {
+            state.audios = [...action.payload, ...(state.audios || [])];
+        },
+        setCurrent: (state, action: PayloadAction<Task>) => {
+            state.current = action.payload;
+            state.audios = undefined;
         },
         // addExhibition: (state, action: PayloadAction<Exhibition>) => {
         //     state.exhibitions = [action.payload, ...state.exhibitions]
@@ -68,12 +78,10 @@ export const slice = createSlice({
 export const {
     setTasks,
     addTask,
-    // fetchImagesStart,
-    // fetchImagesSuccess,
-    // fetchImagesFailure,
-    // fetchExhibitionsStart,
-    // fetchExhibitionsSuccess,
-    // fetchExhibitionsFailure,
+    setAudios,
+    addAudios,
+    setCurrent,
+
     setAuth 
 } = slice.actions
 

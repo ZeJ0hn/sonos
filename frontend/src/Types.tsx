@@ -5,13 +5,13 @@ export enum Status {
 }
 
 export interface Task {
-    id: string,
+    id: number,
     name: string,
     processed: boolean,
 }
 
 export interface Audio {
-    id: string,
+    id: number,
     name: string,
     status: Status,
 }

@@ -5,9 +5,11 @@
     color: grey;
     display: flex;
     justify-content: center;
+    flex-direction: column;
     align-items: center;
     position: relative;
     height: 2rem;
+    overflow: scroll;
   
     &__button {
       position: absolute;

@@ -29,7 +29,7 @@ TABLES['Audios'] = """
         id          MEDIUMINT NOT NULL AUTO_INCREMENT,
         task_id     MEDIUMINT NOT NULL,
         name        VARCHAR(256)  NOT NULL,
-        data        BLOB NOT NULL,
+        data        LONGBLOB NOT NULL,
         status      ENUM('None', 'Done', 'Skip') NOT NULL DEFAULT 'None',
         PRIMARY KEY (id),
         FOREIGN KEY (task_id)

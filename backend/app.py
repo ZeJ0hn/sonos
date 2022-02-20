@@ -133,4 +133,4 @@ async def skip_audio(request: Request, task_id: int, audio_id: int) -> HTTPRespo
 
 
 if __name__ == "__main__":  # pragma: no cover
-    app.run()
+    app.run(host='0.0.0.0', port=8000)
