@@ -1,4 +1,4 @@
-import { Range } from "Types";
+import { Annotations } from "Types";
 
 const drawVerticalLine = (ctx: CanvasRenderingContext2D, height: number, x: number, color: string) => {
     ctx.strokeStyle = color;
@@ -8,18 +8,18 @@ const drawVerticalLine = (ctx: CanvasRenderingContext2D, height: number, x: numb
     ctx.stroke();
 };
 
-const drawRange = (ctx: CanvasRenderingContext2D, height: number, range: Range, color: string) => {
-    if (range.start >= 0) drawVerticalLine(ctx, height, range.start, color);
-    if (range.end >= 0) drawVerticalLine(ctx, height, range.end, color);
-    if (range.start >= 0 && range.end >= 0) {
+const drawRange = (ctx: CanvasRenderingContext2D, height: number, start: number, end: number, color: string) => {
+    if (start >= 0) drawVerticalLine(ctx, height, start, color);
+    if (end >= 0) drawVerticalLine(ctx, height, end, color);
+    if (start >= 0 && end >= 0) {
         ctx.globalAlpha = 0.3;
         ctx.fillStyle = color;
-        ctx.fillRect(range.start, 0, range.end - range.start + 1, height);
+        ctx.fillRect(start, 0, end - start + 1, height);
         ctx.globalAlpha = 1;
     }
 };
 
-const paintViewer = (canvas: HTMLCanvasElement, data: number[], time: number, duration: number, wCoord: Range, uCoord: Range, cursor: number) => {
+const paintViewer = (canvas: HTMLCanvasElement, data: number[], time: number, duration: number, annotations: Annotations, cursor: number) => {
     const ctx = canvas.getContext('2d')
     if (!ctx) return;
     const width = canvas.width;
@@ -38,8 +38,8 @@ const paintViewer = (canvas: HTMLCanvasElement, data: number[], time: number, du
     drawVerticalLine(ctx, height, width * (time / duration), 'red');
     if (cursor >= 0) drawVerticalLine(ctx, height, cursor, 'grey');
 
-    drawRange(ctx, height, wCoord, 'green');
-    drawRange(ctx, height, uCoord, 'purple');
+    drawRange(ctx, height, annotations.wakeword_start, annotations.wakeword_end, 'green');
+    drawRange(ctx, height, annotations.utterance_start, annotations.utterance_end, 'purple');
 
   }
 

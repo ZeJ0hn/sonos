@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Range, Sound, Task } from 'Types';
+import { Annotations, Range, Sound, Task } from 'Types';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectTrack } from 'store/selector';
 import { fetchTrack, skip, validate } from 'store/actions';
@@ -17,6 +17,23 @@ type Props = {
     sound: Sound
 };
 
+const pixel2time = (duration: number, width: number, annotations: Annotations): Annotations => {
+    return {
+        wakeword_start: Math.floor(duration * annotations.wakeword_start / width * 1000),
+        wakeword_end: Math.floor(duration * annotations.wakeword_end / width * 1000),
+        utterance_start: Math.floor(duration * annotations.utterance_start / width * 1000),
+        utterance_end: Math.floor(duration * annotations.utterance_end / width * 1000)
+   }
+}
+
+const time2pixel = (duration: number, width: number, annotations: Annotations): Annotations => {
+    return {
+        wakeword_start: Math.floor(width * annotations.wakeword_start / duration / 1000),
+        wakeword_end: Math.floor(width * annotations.wakeword_end / duration / 1000),
+        utterance_start: Math.floor(width * annotations.utterance_start / duration / 1000),
+        utterance_end: Math.floor(width * annotations.utterance_end / duration / 1000)
+   }
+}
 
 const SoundCard = ({ task, sound }: Props) => {
 
@@ -27,13 +44,17 @@ const SoundCard = ({ task, sound }: Props) => {
     const [duration, setDuration] = useState(0);
     const [audio, setAudio] = useState<HTMLAudioElement | undefined>();
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const [wakeWordCoord, setWakeWordCoord ] = useState<Range>({start: -1, end: -1 });
-    const [utteranceCoord, setUtteranceCoord ] = useState<Range>({start: -1, end: -1 });
+    const [annotations, setAnnotations ] = useState<Annotations>({wakeword_start: -1, wakeword_end: -1, utterance_start: -1, utterance_end: -1 });
     const [cursor, setCursor] = useState(-1);
 
     useEffect(() => {
         dispatch(fetchTrack(task, sound))
     }, [dispatch, task, sound])
+
+    useEffect(() => {
+        if (sound.annotations && canvasRef.current)
+            setAnnotations(time2pixel(duration, canvasRef.current.width, sound.annotations))
+    }, [canvasRef, duration, sound])
 
     useEffect(() => {
         if (track) {
@@ -52,9 +73,9 @@ const SoundCard = ({ task, sound }: Props) => {
 
     useEffect(() => {
         if (canvasRef.current && data) {
-          paintViewer(canvasRef.current, data, time, duration, wakeWordCoord, utteranceCoord, cursor)
+          paintViewer(canvasRef.current, data, time, duration, annotations, cursor)
         }
-      }, [canvasRef, data, time, duration, wakeWordCoord, utteranceCoord, cursor])
+      }, [canvasRef, data, time, duration, annotations, cursor])
 
     if (audio){
         const togglePlay = () => {
@@ -77,10 +98,11 @@ const SoundCard = ({ task, sound }: Props) => {
 
             const x = event.clientX - canvasRef.current.offsetLeft;
 
-            if (wakeWordCoord.start < 0) setWakeWordCoord({...wakeWordCoord, start: x});
-            else if (wakeWordCoord.end < 0) setWakeWordCoord({...wakeWordCoord, end: x});
-            else if (utteranceCoord.start < 0) setUtteranceCoord({...utteranceCoord, start: x});
-            else if (utteranceCoord.end < 0) setUtteranceCoord({...utteranceCoord, end: x});
+            if (annotations.wakeword_start < 0) setAnnotations({...annotations, wakeword_start: x});
+            else if (annotations.wakeword_end < 0) setAnnotations({...annotations, wakeword_end: x});
+            else if (x < annotations.wakeword_start || x < annotations.wakeword_end) return;
+            else if (annotations.utterance_start < 0) setAnnotations({...annotations, utterance_start: x});
+            else if (annotations.utterance_end < 0) setAnnotations({...annotations, utterance_end: x});
         }
 
         const onMouseMove = (event) => {
@@ -89,19 +111,9 @@ const SoundCard = ({ task, sound }: Props) => {
             setCursor(x);
         }
 
-        const onValidate = () => {
-            // TODO Add coordinate check
-            dispatch(validate(task, sound, {
-                 wakeword_start: wakeWordCoord.start,
-                 wakeword_end: wakeWordCoord.end,
-                 utterance_start: utteranceCoord.start,
-                 utterance_end: utteranceCoord.end
-            }))
-        }
-
-        const onSkip = () => {
-            dispatch(skip(task, sound))
-        }
+        const notValid = () => annotations.wakeword_start < 0 || annotations.wakeword_end < 0 || annotations.utterance_start < 0 || annotations.utterance_end < 0;
+        const onValidate = () => canvasRef.current && dispatch(validate(task, sound, pixel2time(duration, canvasRef.current.width, annotations)));
+        const onSkip = () => dispatch(skip(task, sound));
 
         return (
             <div className='audiocard'>
@@ -120,10 +132,13 @@ const SoundCard = ({ task, sound }: Props) => {
                             <button className='audiocard__player__buttons__button' onClick={togglePlay}>{ audio.paused ? <Play/> : <Pause/> }</button>
                             <button className='audiocard__player__buttons__button' onClick={restart}><Replay/></button>
                         </div>
-                        <div>
-                            <button className='audiocard__player__buttons__button' onClick={onValidate}>Validate</button>
-                            <button className='audiocard__player__buttons__button' onClick={onSkip}>Skip</button>
-                        </div>
+                        {
+                            sound.status === 'None' &&
+                            <div>
+                                <button disabled={notValid()} className='audiocard__player__buttons__button' onClick={onValidate}>Validate</button>
+                                <button className='audiocard__player__buttons__button' onClick={onSkip}>Skip</button>
+                            </div>
+                        }
                     </div>
                 </div>
             </div>
@@ -136,3 +151,5 @@ const SoundCard = ({ task, sound }: Props) => {
 };
 
 export default SoundCard;
+
+

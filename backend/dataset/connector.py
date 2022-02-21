@@ -138,9 +138,8 @@ class Connector:
                        utterance_end: int) -> None:
         with self.cursor as curs:
             curs.execute("""
-            INSERT INTO table (id, wakeword_start, wakeword_end, utterance_start, utterance_end) 
-            VALUES(%s, %s, %s, %s, %s, ) 
-            ON DUPLICATE KEY UPDATE
+            REPLACE INTO Annotations (id, wakeword_start, wakeword_end, utterance_start, utterance_end) 
+            VALUES(%s, %s, %s, %s, %s)
             """, (audio_id, wakeword_start, wakeword_end, utterance_start, utterance_end))
             self.__conn.commit()
 
