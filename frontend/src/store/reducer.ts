@@ -55,6 +55,10 @@ export const slice = createSlice({
         addSound: (state, action: PayloadAction<Sound>) => {
             state.sounds = [action.payload, ...(state.sounds || [])];
         },
+        setSound: (state, action: PayloadAction<Sound>) => {
+            // TODO
+            // state.sounds = action.payload;
+        },
         setCurrent: (state, action: PayloadAction<Task>) => {
             state.current = action.payload;
             state.sounds = undefined;
@@ -99,6 +103,7 @@ export const {
     addTask,
     setSounds,
     addSound,
+    setSound,
     setCurrent,
     setTrack,
     setAuth 

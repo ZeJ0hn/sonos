@@ -86,19 +86,17 @@ class Connector:
     def get_audios(self, task_id: str) -> Dict[str, Union[str, bool]]:
         with self.cursor as curs:
             curs.execute("""
-            SELECT id, name, status 
+            SELECT id, name, status, wakeword_start, wakeword_end, utterance_start, utterance_end
             FROM Audios
+            LEFT JOIN Annotations USING(id)
             WHERE task_id = %s
             """, (task_id,))
             rows = curs.fetchall()
 
             result = []
             for row in rows:
-                result.append({
-                    'id': row[0],
-                    'name': row[1],
-                    'status': row[2]
-                })
+                audio = self.__build_audio(row)
+                result.append(audio)
 
             return result
 
@@ -112,19 +110,7 @@ class Connector:
             """, (audio_id, task_id,))
             row = curs.fetchone()
 
-            annotations = {
-                'wakeword_start': row[3],
-                'wakeword_end': row[4],
-                'utterance_start': row[5],
-                'utterance_end': row[6]
-            } if row[3] and row[4] and row[5] and row[6] else {}
-
-            return {
-                'id': row[0],
-                'name': row[1],
-                'status': row[2],
-                'annotations': annotations
-            }
+            return self.__build_audio(row)
 
     def delete_audio(self, task_id: str, audio_id: str) -> None:
         with self.cursor as curs:
@@ -152,7 +138,7 @@ class Connector:
                        utterance_end: int) -> None:
         with self.cursor as curs:
             curs.execute("""
-            INSERT INTO table (id, wakeword_start, wakeword_start, utterance_start, utterance_end) 
+            INSERT INTO table (id, wakeword_start, wakeword_end, utterance_start, utterance_end) 
             VALUES(%s, %s, %s, %s, %s, ) 
             ON DUPLICATE KEY UPDATE
             """, (audio_id, wakeword_start, wakeword_end, utterance_start, utterance_end))
@@ -176,3 +162,21 @@ class Connector:
             WHERE id = %s AND task_id = %s
             """, (status, audio_id, task_id,))
             self.__conn.commit()
+
+    @staticmethod
+    def __build_audio(row):
+        audio = {
+                    'id': row[0],
+                    'name': row[1],
+                    'status': row[2]
+                }
+
+        if row[3] and row[4] and row[5] and row[6]:
+            audio['annotations'] = {
+                        'wakeword_start': row[3],
+                        'wakeword_end': row[4],
+                        'utterance_start': row[5],
+                        'utterance_end': row[6]
+                    }
+            
+        return audio

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Sound, Task } from 'Types';
+import { Annotations, Sound, Task } from 'Types';
 
 export const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
 
@@ -52,3 +52,16 @@ export const getData = async (taskId: number, id: number): Promise<Blob> => {
     const { data } = response;
     return data as Blob;
 }
+
+export const postAnnotatinos = async (taskId: number, id: number, annotations: Annotations): Promise<void> => {
+    await instance.post(`/api/tasks/${taskId}/audios/${id}/annotate`, annotations);
+}
+
+export const postDone = async (taskId: number, id: number): Promise<void> => {
+    await instance.post(`/api/tasks/${taskId}/audios/${id}/done`);
+}
+
+export const postSkip = async (taskId: number, id: number): Promise<void> => {
+    await instance.post(`/api/tasks/${taskId}/audios/${id}/skip`);
+}
+

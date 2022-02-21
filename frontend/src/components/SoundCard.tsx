@@ -1,11 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Sound, Task } from 'Types';
+import { Range, Sound, Task } from 'Types';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectTrack } from 'store/selector';
-import { fetchTrack } from 'store/actions';
+import { fetchTrack, skip, validate } from 'store/actions';
 import { filterData, normalizeData } from 'tools/AudioTools';
 
 import 'components/SoundCard.scss';
+import Play from 'assets/icons/play';
+import Pause from 'assets/icons/pause';
+import Replay from 'assets/icons/replay';
+import paintViewer from 'tools/Painter';
 
 
 type Props = {
@@ -13,52 +17,6 @@ type Props = {
     sound: Sound
 };
 
-const drawVerticalLine = (ctx: CanvasRenderingContext2D, height: number, x: number, color: string) => {
-    ctx.strokeStyle = color;
-    ctx.beginPath();
-    ctx.moveTo(x, 0);
-    ctx.lineTo(x, height);
-    ctx.stroke();
-};
-
-const drawRange = (ctx: CanvasRenderingContext2D, height: number, range: Range, color: string) => {
-    if (range.start >= 0) drawVerticalLine(ctx, height, range.start, color);
-    if (range.end >= 0) drawVerticalLine(ctx, height, range.end, color);
-    if (range.start >= 0 && range.end >= 0) {
-        ctx.globalAlpha = 0.3;
-        ctx.fillStyle = color;
-        ctx.fillRect(range.start, 0, range.end - range.start + 1, height);
-        ctx.globalAlpha = 1;
-    }
-};
-
-const paintCanvas = (canvas: HTMLCanvasElement, data: number[], time: number, duration: number, wCoord: Range, uCoord: Range) => {
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return;
-    const width = canvas.width;
-    const height = canvas.height;
-
-    ctx.clearRect(0, 0, width, height)
-
-    const nbBar = data.length;
-    const barWidth = width / nbBar;
-
-    data.forEach((v, i) => {
-        ctx.fillStyle = 'blue';
-        ctx.fillRect(i * barWidth, height, barWidth, -height * v);
-    })
-
-    drawVerticalLine(ctx, height, width * (time / duration), 'red');
-
-    drawRange(ctx, height, wCoord, 'green');
-    drawRange(ctx, height, uCoord, 'purple');
-
-  }
-
-type Range = {
-    start: number;
-    end: number;
-}
 
 const SoundCard = ({ task, sound }: Props) => {
 
@@ -71,6 +29,7 @@ const SoundCard = ({ task, sound }: Props) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [wakeWordCoord, setWakeWordCoord ] = useState<Range>({start: -1, end: -1 });
     const [utteranceCoord, setUtteranceCoord ] = useState<Range>({start: -1, end: -1 });
+    const [cursor, setCursor] = useState(-1);
 
     useEffect(() => {
         dispatch(fetchTrack(task, sound))
@@ -93,9 +52,9 @@ const SoundCard = ({ task, sound }: Props) => {
 
     useEffect(() => {
         if (canvasRef.current && data) {
-          paintCanvas(canvasRef.current, data, time, duration, wakeWordCoord, utteranceCoord)
+          paintViewer(canvasRef.current, data, time, duration, wakeWordCoord, utteranceCoord, cursor)
         }
-      }, [canvasRef, data, time, duration, wakeWordCoord, utteranceCoord])
+      }, [canvasRef, data, time, duration, wakeWordCoord, utteranceCoord, cursor])
 
     if (audio){
         const togglePlay = () => {
@@ -116,16 +75,32 @@ const SoundCard = ({ task, sound }: Props) => {
         const onClick = (event) => {
             if (!canvasRef.current) return;
 
-            const point = event.clientX - canvasRef.current.offsetLeft;
+            const x = event.clientX - canvasRef.current.offsetLeft;
 
-            if (wakeWordCoord.start < 0) setWakeWordCoord({...wakeWordCoord, start: point});
-            else if (wakeWordCoord.end < 0) setWakeWordCoord({...wakeWordCoord, end: point});
-            else if (utteranceCoord.start < 0) setUtteranceCoord({...utteranceCoord, start: point});
-            else if (utteranceCoord.end < 0) setUtteranceCoord({...utteranceCoord, end: point});
+            if (wakeWordCoord.start < 0) setWakeWordCoord({...wakeWordCoord, start: x});
+            else if (wakeWordCoord.end < 0) setWakeWordCoord({...wakeWordCoord, end: x});
+            else if (utteranceCoord.start < 0) setUtteranceCoord({...utteranceCoord, start: x});
+            else if (utteranceCoord.end < 0) setUtteranceCoord({...utteranceCoord, end: x});
         }
 
-        const validate = () => {
+        const onMouseMove = (event) => {
+            if (!canvasRef.current) return;
+            const x = event.clientX - canvasRef.current.offsetLeft;
+            setCursor(x);
+        }
 
+        const onValidate = () => {
+            // TODO Add coordinate check
+            dispatch(validate(task, sound, {
+                 wakeword_start: wakeWordCoord.start,
+                 wakeword_end: wakeWordCoord.end,
+                 utterance_start: utteranceCoord.start,
+                 utterance_end: utteranceCoord.end
+            }))
+        }
+
+        const onSkip = () => {
+            dispatch(skip(task, sound))
         }
 
         return (
@@ -134,11 +109,21 @@ const SoundCard = ({ task, sound }: Props) => {
                     {sound.name}
                 </div>
                 <div className='audiocard__player'>
-                    <canvas onClick={onClick} ref={canvasRef} className='audiocard__player__viewer' id="myCanvas" width='1000' height="75" />
-                    <div className='audiocard__player_button'>
-                        <button onClick={togglePlay}>Play/Pause</button>
-                        <button onClick={restart}>Reset</button>
-                        <button onClick={validate}>Validate</button>
+                    <canvas 
+                        onClick={onClick} 
+                        onMouseMove={onMouseMove} 
+                        onMouseLeave={() => setCursor(-1)} 
+                        ref={canvasRef} 
+                        className='audiocard__player__viewer' id="myCanvas" width='1000' height="75" />
+                    <div className='audiocard__player__buttons'>
+                        <div>
+                            <button className='audiocard__player__buttons__button' onClick={togglePlay}>{ audio.paused ? <Play/> : <Pause/> }</button>
+                            <button className='audiocard__player__buttons__button' onClick={restart}><Replay/></button>
+                        </div>
+                        <div>
+                            <button className='audiocard__player__buttons__button' onClick={onValidate}>Validate</button>
+                            <button className='audiocard__player__buttons__button' onClick={onSkip}>Skip</button>
+                        </div>
                     </div>
                 </div>
             </div>
