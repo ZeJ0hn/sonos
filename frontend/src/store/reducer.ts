@@ -56,8 +56,9 @@ export const slice = createSlice({
             state.sounds = [action.payload, ...(state.sounds || [])];
         },
         setSound: (state, action: PayloadAction<Sound>) => {
-            // TODO
-            // state.sounds = action.payload;
+            const sounds = state.sounds?.filter(e => e.id !== action.payload.id) || [];
+            sounds.push(action.payload);
+            state.sounds = sounds;
         },
         setCurrent: (state, action: PayloadAction<Task>) => {
             state.current = action.payload;
