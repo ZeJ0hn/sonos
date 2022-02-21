@@ -3,6 +3,7 @@ import { useDispatch } from 'react-redux';
 import { createTask } from 'store/actions';
 
 import 'components/TaskForm.scss';
+import { clearModal } from 'store/reducer';
 
 
 const TaskForm = () => {
@@ -11,7 +12,7 @@ const TaskForm = () => {
 
     const onSubmit = (e) => {
         e.preventDefault();
-        dispatch(createTask(name));
+        dispatch(createTask(name)).then(() => dispatch(clearModal()));;
     };
 
     return (

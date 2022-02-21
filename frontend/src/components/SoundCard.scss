@@ -1,0 +1,22 @@
+.audiocard {
+    background-color: rgb(238, 238, 238);
+    margin: 1rem;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+
+    &__title {
+        font-size: 1rem;
+    }
+
+    &__player {
+        // display: flex;
+        flex-direction: column;
+
+        &__viewer {
+            background-color: white;
+            border: 1px solid grey;
+        }
+    }
+}

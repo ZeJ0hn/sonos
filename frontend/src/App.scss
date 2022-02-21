@@ -1,8 +1,8 @@
 .page {
-  width: 100%;
+  width: 100vw;
   background-color: white;
-  margin: auto;
-  overflow: auto;
+  // margin: auto;
+  // overflow: auto;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -10,6 +10,6 @@
 
 .content {
   flex-grow: 2;
-  padding: 1rem;
+  margin: 1rem;
 }
 

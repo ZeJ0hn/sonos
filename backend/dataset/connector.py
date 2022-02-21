@@ -53,7 +53,7 @@ class Connector:
             return {
                 'id': row[0],
                 'name': row[1],
-                'processed': row[2]
+                'processed': bool(row[2] == 1)
             }
 
     def delete_task(self, task_id: str) -> None:

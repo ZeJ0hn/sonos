@@ -10,7 +10,7 @@ export interface Task {
     processed: boolean,
 }
 
-export interface Audio {
+export interface Sound {
     id: number,
     name: string,
     status: Status,

@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { Task, Audio } from 'Types';
+import { ModalContent } from 'components/Modal';
+import { Task, Sound } from 'Types';
 
 // export enum Status {
 //     DEFAULT = 'default',
@@ -12,39 +13,55 @@ export type State = {
     tasks: Task[],
     current: Task | undefined,
     // imagesStatus: Status,
-    audios: Audio[] | undefined,
+    sounds: Sound[] | undefined,
     // exhibitionsStatus: Status,
-    auth: string | undefined
+    auth: string | undefined,
+    modal: ModalContent | undefined,
+    track: {
+        [key: string]: Blob
+    }
 };
 
 const initialState: State = {
     tasks: [],
     current: undefined,
     // imagesStatus: Status.DEFAULT,
-    audios: undefined,
+    sounds: undefined,
     // exhibitionsStatus: Status.DEFAULT,
-    auth: undefined
+    auth: undefined,
+    modal: undefined,
+    track: {}
 };
 
 export const slice = createSlice({
     name: 'slice',
     initialState,
     reducers: {
+        setModal: (state, action: PayloadAction<ModalContent>) => {
+            state.modal = action.payload;
+        },
+        clearModal: (state) => {
+            state.modal = undefined;
+        },
         setTasks: (state, action: PayloadAction<Task[]>) => {
             state.tasks = action.payload;
         },
         addTask: (state, action: PayloadAction<Task>) => {
             state.tasks = [action.payload, ...state.tasks];
         },
-        setAudios: (state, action: PayloadAction<Audio[]>) => {
-            state.audios = action.payload;
+        setSounds: (state, action: PayloadAction<Sound[]>) => {
+            state.sounds = action.payload;
         },
-        addAudios: (state, action: PayloadAction<Audio[]>) => {
-            state.audios = [...action.payload, ...(state.audios || [])];
+        addSound: (state, action: PayloadAction<Sound>) => {
+            state.sounds = [action.payload, ...(state.sounds || [])];
         },
         setCurrent: (state, action: PayloadAction<Task>) => {
             state.current = action.payload;
-            state.audios = undefined;
+            state.sounds = undefined;
+            state.track = {}
+        },
+        setTrack: (state, action: PayloadAction<{ sound: Sound, data: Blob }>) => {
+            state.track = {...state.track, [action.payload.sound.id]: action.payload.data};
         },
         // addExhibition: (state, action: PayloadAction<Exhibition>) => {
         //     state.exhibitions = [action.payload, ...state.exhibitions]
@@ -76,12 +93,14 @@ export const slice = createSlice({
 })
 
 export const {
+    setModal,
+    clearModal,
     setTasks,
     addTask,
-    setAudios,
-    addAudios,
+    setSounds,
+    addSound,
     setCurrent,
-
+    setTrack,
     setAuth 
 } = slice.actions
 

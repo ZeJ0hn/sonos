@@ -1,6 +1,6 @@
-import { getAudioByID, getAudios, getTaskByID, getTasks, postAudio, postTask } from "services/Api";
-import { Task } from "Types";
-import { addAudios, addTask, setAudios, setCurrent, setTasks } from "./reducer";
+import { getSoundByID, getSounds, getData, getTaskByID, getTasks, postSound, postTask } from "services/Api";
+import { Sound, Task } from "Types";
+import { addSound, addTask, setSounds, setCurrent, setTrack, setTasks } from "./reducer";
 import { AppThunk } from "./store";
 
 export const fetchTasks = (): AppThunk<Promise<void>> => async dispatch => {
@@ -16,16 +16,27 @@ export const createTask = (name: string): AppThunk<Promise<Task>> => async dispa
     });
 };
 
-export const createAudios = (task: Task, files: FileList): AppThunk<Promise<void>> => async dispatch => {
-    Promise.all(Array.from(files).map((f) => {
+export const createSounds = (task: Task, files: FileList): AppThunk<Promise<void[]>> => async dispatch => {
+    return Promise.all(Array.from(files).map((f) => {
         const data = new FormData();
         data.append(f.name, f); 
-        return postAudio(task.id, data)
-            .then((id) => getAudioByID(task.id, id));
-    })).then((audios) => dispatch(addAudios(audios)));
+        return postSound(task.id, data)
+            .then((id) => getSoundByID(task.id, id))
+            .then((Sounds) => {
+                dispatch(addSound(Sounds));
+            });
+    }));
 };
 
 export const fetchCurrent = (task: Task): AppThunk<Promise<void>> => async dispatch => {
     dispatch(setCurrent(task));
-    getAudios(task.id).then((audios) => dispatch(setAudios(audios)))
+    return getSounds(task.id).then((Sounds) => {
+        dispatch(setSounds(Sounds));
+    })
+};
+
+export const fetchTrack  = (task: Task, sound: Sound): AppThunk<Promise<void>> => async dispatch => {
+    return getData(task.id, sound.id).then((data) => {
+        dispatch(setTrack({ sound, data }));
+    })
 };
