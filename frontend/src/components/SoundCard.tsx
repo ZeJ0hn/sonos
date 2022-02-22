@@ -152,6 +152,10 @@ const SoundCard = ({ task, sound, readonly }: Props) => {
                                 <button className='audiocard__player__buttons__button' onClick={onSkip}>Skip</button>
                             </div>
                         }
+                        {
+                            (sound.status !== 'None' && readonly) &&
+                            <div className='audiocard__player__buttons__status'>{sound.status}</div>
+                        }
                     </div>
                 </div>
             </div>

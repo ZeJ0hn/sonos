@@ -19,10 +19,11 @@
 
         &__buttons {
             display: flex;
+            align-items: center;
 
             &__text {
                 width: 800px !important;
-                padding: 0.2rem 0.2rem !important;
+                padding: 0.2rem !important;
             }
 
             &__button {
@@ -41,6 +42,12 @@
                 &:disabled {
                     color: grey;
                 }
+            }
+
+            &__status {
+                color: green;
+                font-weight: bold;
+                padding: 0.2rem !important;
             }
         }
     }

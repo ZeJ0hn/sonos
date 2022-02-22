@@ -21,3 +21,10 @@ services:
       - 8000:8000
     environment:
       DB_HOST: db
+
+  frontend:
+    build: ./frontend
+    image: "frontend:latest"
+    restart: always
+    ports:
+      - 3000:3000

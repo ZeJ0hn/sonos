@@ -1,6 +1,8 @@
 """Main module for the backend server"""
 
-from sanic import Sanic, json
+from typing import Dict, Tuple
+
+from sanic import Sanic
 from sanic.exceptions import InvalidUsage
 from sanic.request import Request
 from sanic.response import HTTPResponse
@@ -17,7 +19,8 @@ _connector = Connector()
 SetUp(_connector)
 
 
-def __check(data, keys):
+def __check(data: Dict[str, str], keys: Tuple[str, ...]) -> bool:
+    """Check if all keys are present in a dict"""
     return all(k in data.keys() for k in keys)
 
 
@@ -26,7 +29,7 @@ async def create_task(request: Request) -> HTTPResponse:
     data = request.json
 
     if not __check(data, ('name',)):
-        return InvalidUsage("Payload must contains only task name")
+        raise InvalidUsage("Payload must contains only task name")
 
     task_id = _connector.create_task(name=data['name'])
 
@@ -50,23 +53,16 @@ async def get_task(request: Request, task_id: int) -> HTTPResponse:
 
 
 @app.delete("/api/tasks/<task_id:int>/delete")
-async def get_task(request: Request, task_id: int) -> HTTPResponse:
+async def delete_task(request: Request, task_id: int) -> HTTPResponse:
     _connector.delete_task(task_id=task_id)
 
     return empty(200)
 
 
-@app.post("/api/tasks/<task_id:int>/done")
-async def get_tasks(request: Request, task_id: int) -> HTTPResponse:
-    _connector.mark_processed(task_id=task_id)
-
-    return empty(status=200)
-
-
 @app.post("/api/tasks/<task_id:int>/audios/create")
 async def add_audio(request: Request, task_id: int) -> HTTPResponse:
     if len(request.files) != 1:
-        return InvalidUsage("Form must contains just one files")
+        raise InvalidUsage("Form must contains just one files")
 
     name = next(iter(request.files))
     file = request.files.get(name)
@@ -111,7 +107,9 @@ async def annotate_audio(request: Request, task_id: int, audio_id: int) -> HTTPR
     data = request.json
 
     if not __check(data, ('wakeword_start', 'wakeword_start', 'utterance_start', 'utterance_end', 'text')):
-        return InvalidUsage("Payload must contains: wakeword_start, wakeword_start, utterance_start, utterance_end and text.")
+        raise InvalidUsage("""
+            Payload must contains: wakeword_start, wakeword_start, utterance_start, utterance_end and text.
+        """)
 
     _connector.annotate_audio(audio_id=audio_id, **data)
 

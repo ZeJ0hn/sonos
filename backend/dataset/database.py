@@ -2,19 +2,10 @@ import os
 import time
 
 import mysql.connector
-from mysql.connector import MySQLConnection, InterfaceError
+from mysql.connector import MySQLConnection
 from sanic.log import logger
 
 TABLES = {}
-TABLES['Users'] = """
-    CREATE TABLE IF NOT EXISTS Users (
-        id          MEDIUMINT NOT NULL AUTO_INCREMENT,
-        name        VARCHAR(128) NOT NULL,
-        password    CHAR(32) NOT NULL,
-        PRIMARY KEY (id)
-    ) ENGINE=InnoDB;
-"""
-
 TABLES['Tasks'] = """
     CREATE TABLE IF NOT EXISTS Tasks (
         id          MEDIUMINT NOT NULL AUTO_INCREMENT,
@@ -44,7 +35,7 @@ TABLES['Annotations'] = """
         wakeword_end    INT NOT NULL,
         utterance_start INT NOT NULL,
         utterance_end   INT NOT NULL,
-        text            VARCHAR(512) NOT NULL,   
+        text            VARCHAR(512) NOT NULL,
         PRIMARY KEY (id),
         FOREIGN KEY (id)
             REFERENCES Audios(id)
@@ -83,14 +74,15 @@ def connect() -> MySQLConnection:
 
     return None
 
+
 def try_to_connect(db_host: str, db_user: str, db_password: str, db_database: str) -> MySQLConnection:
     attemps = 0
     while attemps < 15:
         try:
             return mysql.connector.connect(host=db_host,
-                                        user=db_user,
-                                        password=db_password,
-                                        database=db_database)
+                                           user=db_user,
+                                           password=db_password,
+                                           database=db_database)
         except Exception:
             attemps += 1
             time.sleep(2)
