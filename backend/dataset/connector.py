@@ -26,7 +26,7 @@ class Connector:
     def get_tasks(self) -> Dict[str, str]:
         with self.cursor as curs:
             curs.execute("""
-            SELECT id, name, processed 
+            SELECT id, name 
             FROM Tasks
             """)
             rows = curs.fetchall()
@@ -36,7 +36,7 @@ class Connector:
                 result.append({
                     'id': row[0],
                     'name': row[1],
-                    'processed': bool(row[2] == 1)
+                    'processed': self.__is_processed(row[0])
                 })
 
             return result
@@ -44,7 +44,7 @@ class Connector:
     def get_task(self, task_id: str) -> Dict[str, str]:
         with self.cursor as curs:
             curs.execute("""
-            SELECT id, name, processed 
+            SELECT id, name 
             FROM Tasks 
             WHERE id = %s
             """, (task_id,))
@@ -53,7 +53,7 @@ class Connector:
             return {
                 'id': row[0],
                 'name': row[1],
-                'processed': bool(row[2] == 1)
+                'processed': self.__is_processed(row[0])
             }
 
     def delete_task(self, task_id: str) -> None:
@@ -162,6 +162,17 @@ class Connector:
             WHERE id = %s AND task_id = %s
             """, (status, audio_id, task_id,))
             self.__conn.commit()
+
+    def __is_processed(self, task_id: str):
+        with self.cursor as curs:
+            curs.execute("""
+            SELECT COUNT(status) 
+            FROM Audios 
+            WHERE task_id = %s and status = 'None'
+            """, (task_id,))
+            row = curs.fetchone()
+
+            return bool(row[0] == 0)
 
     @staticmethod
     def __build_audio(row):

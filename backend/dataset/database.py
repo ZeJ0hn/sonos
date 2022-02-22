@@ -19,7 +19,6 @@ TABLES['Tasks'] = """
     CREATE TABLE IF NOT EXISTS Tasks (
         id          MEDIUMINT NOT NULL AUTO_INCREMENT,
         name        VARCHAR(128) NOT NULL,
-        processed   BOOLEAN NOT NULL DEFAULT false,
         PRIMARY KEY (id)
     ) ENGINE=InnoDB;
 """
