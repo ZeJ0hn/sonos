@@ -14,10 +14,6 @@ export const selectCurrent = (state: RootState): Task | undefined => (
   state.current
 );
 
-export const isSignIn = (state: RootState): boolean => (
-  state.auth != null
-);
-
 export const selectSounds  = (state: RootState): Sound[] | undefined => (
   state.sounds
 );

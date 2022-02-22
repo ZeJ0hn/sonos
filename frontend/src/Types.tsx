@@ -21,7 +21,8 @@ export interface Annotations {
     wakeword_start: number,
     wakeword_end: number,
     utterance_start: number,
-    utterance_end: number
+    utterance_end: number,
+    text: string,
 }
 
 export type Range = {

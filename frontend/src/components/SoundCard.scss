@@ -20,6 +20,11 @@
         &__buttons {
             display: flex;
 
+            &__text {
+                width: 800px !important;
+                padding: 0.2rem 0.2rem !important;
+            }
+
             &__button {
                 cursor: pointer;
                 border: 1px solid black;

@@ -2,20 +2,10 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { ModalContent } from 'components/Modal';
 import { Task, Sound } from 'Types';
 
-// export enum Status {
-//     DEFAULT = 'default',
-//     LOADING = 'loading',
-//     SUCCESS = 'success',
-//     FAILURE = 'failure'
-//   }
-
 export type State = {
     tasks: Task[],
     current: Task | undefined,
-    // imagesStatus: Status,
     sounds: Sound[] | undefined,
-    // exhibitionsStatus: Status,
-    auth: string | undefined,
     modal: ModalContent | undefined,
     track: {
         [key: string]: Blob
@@ -25,10 +15,7 @@ export type State = {
 const initialState: State = {
     tasks: [],
     current: undefined,
-    // imagesStatus: Status.DEFAULT,
     sounds: undefined,
-    // exhibitionsStatus: Status.DEFAULT,
-    auth: undefined,
     modal: undefined,
     track: {}
 };
@@ -68,31 +55,10 @@ export const slice = createSlice({
         setTrack: (state, action: PayloadAction<{ sound: Sound, data: Blob }>) => {
             state.track = {...state.track, [action.payload.sound.id]: action.payload.data};
         },
-        // addExhibition: (state, action: PayloadAction<Exhibition>) => {
-        //     state.exhibitions = [action.payload, ...state.exhibitions]
-        // },
-        // fetchImagesStart: (state) => {
-        //     state.imagesStatus = Status.LOADING;
-        // },
-        // fetchImagesSuccess: (state, action: PayloadAction<Image[]>) => {
-        //     state.images = action.payload;
-        //     state.imagesStatus = Status.SUCCESS;
-        // },
-        // fetchImagesFailure: (state, action: PayloadAction<string>) => {
-        //     state.imagesStatus = Status.FAILURE;
-        // },
-        // fetchExhibitionsStart: (state) => {
-        //     state.exhibitionsStatus = Status.LOADING;
-        // },
-        // fetchExhibitionsSuccess: (state, action: PayloadAction<Exhibition[]>) => {
-        //     state.exhibitions = action.payload;
-        //     state.exhibitionsStatus = Status.SUCCESS;
-        // },
-        // fetchExhibitionsFailure: (state, action: PayloadAction<string>) => {
-        //     state.exhibitionsStatus = Status.FAILURE;
-        // },
-        setAuth: (state, action: PayloadAction<string | undefined>) => {
-            state.auth = action.payload;
+        clearCurrent: (state) => {
+            state.current = undefined;
+            state.sounds = undefined;
+            state.track = {}
         },
     },
 })
@@ -107,7 +73,7 @@ export const {
     setSound,
     setCurrent,
     setTrack,
-    setAuth 
+    clearCurrent
 } = slice.actions
 
 export default slice.reducer

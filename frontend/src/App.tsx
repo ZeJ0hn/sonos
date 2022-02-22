@@ -1,27 +1,28 @@
 import React, { useEffect } from 'react';
 import Menu from './components/Menu';
 import {
-    BrowserRouter as Router,
     Switch,
-    Route
+    Route,
+    Redirect,
+    useLocation
 } from "react-router-dom";
 import WebFont from 'webfontloader';
-import SignIn from './components/SignIn';
 import { ADMIN_ROUTE, TASKS_ROUTE } from 'Routes';
-import Admin from 'components/Editor';
+import Editor from 'components/Editor';
 import Modal from 'components/Modal';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchTasks } from 'store/actions';
-
-import 'App.scss';
 import { selectModal } from 'store/selector';
 import { clearModal } from 'store/reducer';
+
+import 'App.scss';
 
 
 const App = () => {
 
     const dispatch = useDispatch();
     const modal = useSelector(selectModal);
+    const location = useLocation();
 
     useEffect(() => {
         WebFont.load({
@@ -36,21 +37,18 @@ const App = () => {
     }, [dispatch]);
 
     return (
-        <Router>
             <div className='page'>
-                <Menu />
+                <Menu path={location.pathname}/>
 
                 <div className='content'>
                     <Switch>
                         <Route strict path={ADMIN_ROUTE}>
-                            <Admin />
+                            <Editor admin={true} />
                         </Route>
-                        {/* <Route strict path={TASKS_ROUTE}>
-                            <Gallery openModal={setModal} />
-                        </Route> */}
-                        {/* <Route path="/">
-                            <Home />
-                        </Route> */}
+                        <Route strict path={TASKS_ROUTE}>
+                            <Editor admin={false} />
+                        </Route>
+                        <Redirect to={TASKS_ROUTE} />
                     </Switch>
                 </div>
 
@@ -63,7 +61,6 @@ const App = () => {
                     )
                 }
             </div>
-        </Router>
     );
 }
 

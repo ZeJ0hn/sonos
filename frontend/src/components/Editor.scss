@@ -36,6 +36,11 @@
                     justify-content: left;
                     align-items: center;
                     padding-left: 1rem;
+                    padding-right: 1rem;
+
+                    &__text {
+                        padding-left: 0.2rem;
+                    }
 
                     &__selected {
                         border: solid 1px grey;
@@ -48,7 +53,7 @@
             display: flex;
             flex-direction: column;
             align-items: stretch;
-            // flex-grow: 1;
+            width: 1100px;
 
             &__header {
                 display: flex;
