@@ -7,7 +7,7 @@ import {
     useLocation
 } from "react-router-dom";
 import WebFont from 'webfontloader';
-import { ADMIN_ROUTE, TASKS_ROUTE } from 'Routes';
+import { ADMIN_ROUTE, OPERATOR_ROUTE } from 'Routes';
 import Editor from 'components/Editor';
 import Modal from 'components/Modal';
 import { useDispatch, useSelector } from 'react-redux';
@@ -45,10 +45,10 @@ const App = () => {
                         <Route strict path={ADMIN_ROUTE}>
                             <Editor admin={true} />
                         </Route>
-                        <Route strict path={TASKS_ROUTE}>
+                        <Route strict path={OPERATOR_ROUTE}>
                             <Editor admin={false} />
                         </Route>
-                        <Redirect to={TASKS_ROUTE} />
+                        <Redirect to={OPERATOR_ROUTE} />
                     </Switch>
                 </div>
 

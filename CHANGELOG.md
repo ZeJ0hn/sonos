@@ -38,6 +38,8 @@ docker-compose up --build
 
 Docker images should be built and every container (database, backend and frontend) must be started.
 
+The frontend is now available on: http://localhost:3000
+
 ## Code quality and unit tests
 
 ### Backend
