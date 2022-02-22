@@ -40,11 +40,12 @@ TABLES['Audios'] = """
 
 TABLES['Annotations'] = """
     CREATE TABLE IF NOT EXISTS Annotations (
-        id   MEDIUMINT NOT NULL,
-        wakeword_start INT NOT NULL,
-        wakeword_end INT NOT NULL,
+        id              MEDIUMINT NOT NULL,
+        wakeword_start  INT NOT NULL,
+        wakeword_end    INT NOT NULL,
         utterance_start INT NOT NULL,
-        utterance_end INT NOT NULL,
+        utterance_end   INT NOT NULL,
+        text            VARCHAR(512) NOT NULL,   
         PRIMARY KEY (id),
         FOREIGN KEY (id)
             REFERENCES Audios(id)

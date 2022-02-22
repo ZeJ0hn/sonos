@@ -86,7 +86,7 @@ class Connector:
     def get_audios(self, task_id: str) -> Dict[str, Union[str, bool]]:
         with self.cursor as curs:
             curs.execute("""
-            SELECT id, name, status, wakeword_start, wakeword_end, utterance_start, utterance_end
+            SELECT id, name, status, wakeword_start, wakeword_end, utterance_start, utterance_end, text
             FROM Audios
             LEFT JOIN Annotations USING(id)
             WHERE task_id = %s
@@ -103,7 +103,7 @@ class Connector:
     def get_audio(self, task_id: str, audio_id: str) -> Dict[str, Union[str, bool]]:
         with self.cursor as curs:
             curs.execute("""
-            SELECT id, name, status, wakeword_start, wakeword_end, utterance_start, utterance_end
+            SELECT id, name, status, wakeword_start, wakeword_end, utterance_start, utterance_end, text
             FROM Audios 
             LEFT JOIN Annotations USING(id)
             WHERE id = %s AND task_id = %s
@@ -135,12 +135,13 @@ class Connector:
                        wakeword_start: int,
                        wakeword_end: int,
                        utterance_start: int,
-                       utterance_end: int) -> None:
+                       utterance_end: int,
+                       text: str) -> None:
         with self.cursor as curs:
             curs.execute("""
-            REPLACE INTO Annotations (id, wakeword_start, wakeword_end, utterance_start, utterance_end) 
-            VALUES(%s, %s, %s, %s, %s)
-            """, (audio_id, wakeword_start, wakeword_end, utterance_start, utterance_end))
+            REPLACE INTO Annotations (id, wakeword_start, wakeword_end, utterance_start, utterance_end, text) 
+            VALUES(%s, %s, %s, %s, %s, %s)
+            """, (audio_id, wakeword_start, wakeword_end, utterance_start, utterance_end, text))
             self.__conn.commit()
 
     def mark_done(self, task_id: str, audio_id: str) -> None:
@@ -175,7 +176,8 @@ class Connector:
                         'wakeword_start': row[3],
                         'wakeword_end': row[4],
                         'utterance_start': row[5],
-                        'utterance_end': row[6]
+                        'utterance_end': row[6],
+                        'text': row[7]
                     }
             
         return audio

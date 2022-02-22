@@ -110,8 +110,8 @@ async def get_track(request: Request, task_id: int, audio_id: int) -> HTTPRespon
 async def annotate_audio(request: Request, task_id: int, audio_id: int) -> HTTPResponse:
     data = request.json
 
-    if not __check(data, ('wakeword_start', 'wakeword_start', 'utterance_start', 'utterance_end')):
-        return InvalidUsage("Payload must contains: wakeword_start, wakeword_start, utterance_start, utterance_end")
+    if not __check(data, ('wakeword_start', 'wakeword_start', 'utterance_start', 'utterance_end', 'text')):
+        return InvalidUsage("Payload must contains: wakeword_start, wakeword_start, utterance_start, utterance_end and text.")
 
     _connector.annotate_audio(audio_id=audio_id, **data)
 
